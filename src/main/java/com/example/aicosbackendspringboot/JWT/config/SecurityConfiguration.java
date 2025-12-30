@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL)
+                        req.requestMatchers("/api/v1/auth/google")// 登入 API 排除驗證
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

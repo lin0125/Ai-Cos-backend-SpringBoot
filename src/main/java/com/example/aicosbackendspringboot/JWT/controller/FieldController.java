@@ -3,11 +3,13 @@ package com.example.aicosbackendspringboot.JWT.controller;
 import com.example.aicosbackendspringboot.JWT.dtos.request.AddFieldRequest;
 import com.example.aicosbackendspringboot.JWT.dtos.response.CommonResponse;
 import com.example.aicosbackendspringboot.JWT.service.FieldService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class FieldController {
     private FieldService fieldService;
 
