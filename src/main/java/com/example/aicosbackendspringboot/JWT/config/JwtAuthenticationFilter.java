@@ -35,7 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        if (request.getServletPath().equals("/api/v1/auth/google")) {
+        String path = request.getServletPath();
+        // 增加 Swagger 相關路徑的排除判斷
+        if (path.equals("/api/v1/auth/google") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui")) {
             filterChain.doFilter(request, response);
             return;
         }

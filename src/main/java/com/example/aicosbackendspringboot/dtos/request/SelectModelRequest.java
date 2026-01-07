@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SelectModelRequest {
 
     private String type;
-    private String filename;
+    private Integer modelId; // 將 String filename 改為 Integer modelId
 
     // Getter & Setter
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public String getFilename() { return filename; }
-    public void setFilename(String filename) { this.filename = filename; }
+    public Integer getModelId() { return modelId; } // 對應修改
+    public void setModelId(Integer modelId) { this.modelId = modelId; } // 對應修改
 }

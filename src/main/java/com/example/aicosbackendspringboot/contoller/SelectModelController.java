@@ -28,12 +28,12 @@ public class SelectModelController {
     @PostMapping
     public ResponseEntity<?> selectModel(@RequestBody SelectModelRequest request) {
         try {
-            Map<String, Object> result = modelService.selectModel(request.getType(), request.getFilename());
+            // 將原本的 request.getFilename() 改為 request.getModelId()
+            // 這樣傳入 Service 的參數類型就會是 Integer，符合您 Service 的定義
+            Map<String, Object> result = modelService.selectModel(request.getType(), request.getModelId());
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        } catch (FileNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }

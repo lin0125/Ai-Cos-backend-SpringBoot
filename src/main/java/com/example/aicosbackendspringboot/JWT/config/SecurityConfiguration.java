@@ -19,7 +19,10 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private static final String[] WHITE_LIST_URL = {
-            "/api/v1/auth/google"
+            "/api/v1/auth/google",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -30,7 +33,7 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/v1/auth/google")// 登入 API 排除驗證
+                        req.requestMatchers(WHITE_LIST_URL)// 登入 API 排除驗證
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
