@@ -1,4 +1,4 @@
-package com.example.aicosbackendspringboot.contoller;
+package com.example.aicosbackendspringboot.controller;
 
 import com.example.aicosbackendspringboot.service.GetDashboardDataService;
 import org.springframework.beans.factory.annotation.Autowired;

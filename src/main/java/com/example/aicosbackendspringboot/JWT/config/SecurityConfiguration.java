@@ -28,10 +28,11 @@ public class SecurityConfiguration {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api/getDashboardData",  // Dashboard 資料
-            "/getChillersData",       // 冰機資料 (注意這個 Controller 沒有 /api 前綴)
+            "/api/getChillersData",       // 冰機資料 (注意這個 Controller 沒有 /api 前綴)
             "/api/getHistoryData",    // 歷史資料
             "/api/getChillerParam",   // 冰機參數
-            "/listModels"             // 模型列表
+            "/listModels",            // 模型列表
+            "/api/grafana-embed"
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
 

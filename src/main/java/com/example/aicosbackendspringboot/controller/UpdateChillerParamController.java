@@ -1,4 +1,4 @@
-package com.example.aicosbackendspringboot.contoller;
+package com.example.aicosbackendspringboot.controller;
 
 import com.example.aicosbackendspringboot.dtos.chiller.ChillerConfig;
 import com.example.aicosbackendspringboot.service.UpdateChillerParamService;

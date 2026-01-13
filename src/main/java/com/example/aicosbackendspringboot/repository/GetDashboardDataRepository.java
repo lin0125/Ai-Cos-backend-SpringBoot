@@ -80,7 +80,7 @@ public class GetDashboardDataRepository {
         String baseDir = "datasets/";
 
         // 1. 先嘗試組出「當前時間」的檔名 (例如 2026011322.csv)
-        String targetFilename = year + month + day + hour + ".csv";
+        String targetFilename = year + month + day +  ".csv";
         String hourlyPath = baseDir + targetFilename;
         Path pathCheck = Paths.get(hourlyPath);
 
