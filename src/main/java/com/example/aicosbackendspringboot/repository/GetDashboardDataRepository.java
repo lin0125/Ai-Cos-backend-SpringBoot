@@ -50,7 +50,7 @@ public class GetDashboardDataRepository {
             try (BufferedReader br = Files.newBufferedReader(outputStatePath)) {
                 String line = br.readLine();
                 if (!"0".equals(line)) {
-                    outputPath = "C:/Megabank_datafile/SoundAir/AI-" + year + month + day + "-" + hour + ".csv";
+                    outputPath = "F:/Desktop/Ai-Cos-backend-SpringBoot/datasets" + year + month + day + "-" + hour + ".csv";
                 }
             }
         } else {
@@ -89,7 +89,7 @@ public class GetDashboardDataRepository {
             System.out.println("⚠️ 找不到當前時間的檔案: " + hourlyPath);
 
             // 3. 如果不存在，強制切換成「備援測試檔」 (請確保此檔案存在於 datasets 資料夾中)
-            String defaultFile = "2024082018.csv";
+            String defaultFile = "20260114.csv";
             hourlyPath = baseDir + defaultFile;
 
             System.out.println("🔄 自動切換讀取備援檔案: " + hourlyPath);

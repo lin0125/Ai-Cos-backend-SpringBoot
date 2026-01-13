@@ -5,19 +5,18 @@ import lombok.Data;
 
 @Data
 public class ChillerConfig {
-
     @JsonProperty("min_temperature")
-    private Double min_temperature;
+    private Double minTemperature;
 
     @JsonProperty("max_temperature")
-    private Double max_temperature;
+    private Double maxTemperature;
 
     @JsonProperty("base_temperature")
-    private Double base_temperature;
+    private Double baseTemperature;
 
     @JsonProperty("temp_step")
-    private Double temp_step;
+    private Double tempStep;
 
     @JsonProperty("update_rate")
-    private Integer update_rate;
+    private Integer updateRate;
 }
