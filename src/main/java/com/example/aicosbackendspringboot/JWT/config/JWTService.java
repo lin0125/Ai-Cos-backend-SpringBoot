@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -30,8 +31,42 @@ public class JWTService {
     }
 
     public String extractUserType(String token) {
-        final Claims claims = extractAllClaims(token);
-        return (String) claims.get("userType");
+        Claims claims = extractAllClaims(token);
+        Object userTypeObject = claims.get("userType");
+
+        if (userTypeObject == null) {
+            return null;
+        }
+
+        // 情況 A: 它是 List (例如 ["admin"] 或 [{authority=admin}])
+        if (userTypeObject instanceof List) {
+            List<?> list = (List<?>) userTypeObject;
+            if (!list.isEmpty()) {
+                Object firstItem = list.get(0);
+                // 如果 List 裡面包的是 Map (例如 Spring Security 常見的 [{authority=admin}])
+                if (firstItem instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) firstItem;
+                    if (map.containsKey("authority")) {
+                        return map.get("authority").toString();
+                    }
+                }
+                // 否則直接轉字串
+                return firstItem.toString();
+            }
+        }
+        // 情況 B: 它是 Map (這就是你 Log 顯示的狀況: {authority=admin})
+        else if (userTypeObject instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) userTypeObject;
+            if (map.containsKey("authority")) {
+                return map.get("authority").toString();
+            }
+        }
+        // 情況 C: 它是純字串
+        else {
+            return userTypeObject.toString();
+        }
+
+        return null;
     }
 
     public String extractUserEmail(String token) {

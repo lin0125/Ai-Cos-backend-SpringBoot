@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.example.aicosbackendspringboot.JWT.base.Role;
+import com.example.aicosbackendspringboot.JWT.base.Role; // 確保有 import 這行
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String path = request.getServletPath();
-        // 增加 Swagger 相關路徑的排除判斷
         if (path.equals("/api/v1/auth/google") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-ui")) {
@@ -45,9 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String authHeader = request.getHeader("Authorization");
-
         final String jwt;
-
         final String userAccount;
         final String userType;
 
@@ -57,16 +54,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         jwt = authHeader.substring(7);
 
-        userAccount = jwtService.extractUserName(jwt).toString();
-        userType = jwtService.extractUserType(jwt).toString();
+        // 確保這裡轉成字串，避免 null
+        userAccount = String.valueOf(jwtService.extractUserName(jwt));
+        userType = String.valueOf(jwtService.extractUserType(jwt));
 
         if (!userAccount.isEmpty() && !userType.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = null;
-            if (Role.user.name().equals(userType)){
+
+            // ★★★ 修改重點開始 ★★★
+            // 判斷是否為 user 或 admin (忽略大小寫)
+            // 這裡假設你的 UserDetailsService 可以同時處理 user 和 admin 的帳號查詢
+            if ("user".equalsIgnoreCase(userType) ||
+                    "admin".equalsIgnoreCase(userType) ||
+                    Role.user.name().equalsIgnoreCase(userType)) {
+
                 userDetails = userDetailsService.loadUserByUsername(userAccount);
+
             } else {
                 log.warn("JWT token contains unknown userType: {}", userType);
             }
+            // ★★★ 修改重點結束 ★★★
+
             if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
