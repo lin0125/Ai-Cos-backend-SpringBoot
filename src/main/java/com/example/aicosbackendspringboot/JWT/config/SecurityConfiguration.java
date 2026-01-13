@@ -26,7 +26,12 @@ public class SecurityConfiguration {
             "/api/v1/auth/google",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/api/getDashboardData",  // Dashboard 資料
+            "/getChillersData",       // 冰機資料 (注意這個 Controller 沒有 /api 前綴)
+            "/api/getHistoryData",    // 歷史資料
+            "/api/getChillerParam",   // 冰機參數
+            "/listModels"             // 模型列表
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
 

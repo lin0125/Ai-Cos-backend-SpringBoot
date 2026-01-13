@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-//@EnableScheduling // 取代 Node.js 的 setInterval
+@EnableScheduling // 取代 Node.js 的 setInterval
 //@EnableCaching    // 取代 Node.js 的 cache 物件
 @SpringBootApplication
 public class AiCosBackendSpringBootApplication {

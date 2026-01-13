@@ -20,11 +20,14 @@ public class GetDashboardDataController {
     private GetDashboardDataService dashboardService;
 
     @GetMapping("/getDashboardData")
-    public ResponseEntity<?> getDashboardData(@RequestParam(required = false) Integer count) {
+    // ★★★ 修改這裡：加上 value = "ts" ★★★
+    public ResponseEntity<?> getDashboardData(@RequestParam(value = "ts", required = false) Integer count) {
         try {
+            // 防呆：如果前端連 ts 都沒傳，就預設用當前小時
             if (count == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "count 參數必須提供"));
+                count = java.time.LocalDateTime.now().getHour();
             }
+
             return ResponseEntity.ok(dashboardService.getDashboardData(count));
         } catch (ServiceUnavailableException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
