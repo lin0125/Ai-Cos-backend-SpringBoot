@@ -48,9 +48,11 @@ public class UserImpl implements UserService {
             String email = payload.getEmail();
             String name = (String) payload.get("name");
 
+            // ✅ 1. 宣告變數 (必須在 if/else 外面宣告，否則後面會找不到)
             UserEntity userToProcess;
 
             Optional<UserEntity> existingUser = userRepository.findByUserEmail(email);
+
             if (existingUser.isEmpty()) {
                 // 使用者不存在，建立新使用者
                 UserEntity newUser = new UserEntity();
@@ -64,18 +66,24 @@ public class UserImpl implements UserService {
                     newUser.setRole(Role.user);
                 }
 
+                // ✅ 2. 賦值 (這裡不要再寫 UserEntity userToProcess = ...，不然會變成區域變數)
                 userToProcess = userRepository.save(newUser);
             } else {
+                // ✅ 3. 賦值
                 userToProcess = existingUser.get();
             }
 
+            // ✅ 4. 使用 (因為在第 1 步有宣告在外面，所以這裡才讀得到)
             String userToken = jwtService.generateToken(userToProcess);
 
             LinkedHashMap<String, Object> data = new LinkedHashMap<>();
             data.put("message", "Authentication Successful");
             data.put("userName", name);
             data.put("userEmail", email);
-            data.put("userToken", userToken);
+
+            // ✅ 5. 確保 Key 名稱是 "token" (配合前端)
+            data.put("token", userToken);
+
             data.put("userRole", userToProcess.getRole());
 
             return CommonResponse.builder()

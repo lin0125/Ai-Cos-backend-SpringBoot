@@ -10,7 +10,7 @@ import java.util.Map;
 @Repository
 public class GetHistoryDataRepository {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String UP_CORE_BASE = "http://localhost:5001";
+    private final String UP_CORE_BASE = "http://localhost:3000";
 
     public Map<String, Object> fetchTimeSeries(String dataType, String startTime, String endTime,
                                                String measurement, String device, String bucket) throws Exception {

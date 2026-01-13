@@ -19,9 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+
     @Operation(summary = "Google 登入驗證", description = "接收 Google ID Token 並回傳 JWT")
     @PostMapping("/auth/google")
-    private ResponseEntity<CommonResponse> authGoogleToken(@RequestBody LoginRequest request) {
+    // 🔴 修改前：private
+    // private ResponseEntity<CommonResponse> authGoogleToken(@RequestBody LoginRequest request) {
+
+    // 🟢 修改後：改成 public
+    public ResponseEntity<CommonResponse> authGoogleToken(@RequestBody LoginRequest request) {
         try {
             return ResponseEntity.ok().body(userService.authGoogleToken(request));
         } catch (Exception e) {
