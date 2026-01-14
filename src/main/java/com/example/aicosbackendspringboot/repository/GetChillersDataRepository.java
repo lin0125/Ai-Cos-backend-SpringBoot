@@ -20,14 +20,14 @@ public class GetChillersDataRepository {
 
     public ChillerData readHourlyChillerData() {
         // [測試模式] 強制指定時間，讀取 2025/05/16 02:00 的資料
-        LocalDateTime now = LocalDateTime.of(2025, 5, 16, 2, 0, 0);
+        LocalDateTime now = LocalDateTime.of(2026, 1, 13, 1, 0, 0);
 
         String fileName = now.format(DateTimeFormatter.ofPattern("yyyyMMddHH")) + ".csv";
         File targetFile = new File(csvFilePath, fileName);
 
         // 1. 檢查檔案 (包含自動往回找與測試檔邏輯)
         if (!targetFile.exists()) {
-            System.err.println("❌ [Repository] 當前檔案不存在: " + targetFile.getAbsolutePath());
+//            System.err.println("❌ [Repository] 當前檔案不存在: " + targetFile.getAbsolutePath());
             boolean found = false;
 
             // 往回找最近 5 小時
@@ -45,7 +45,7 @@ public class GetChillersDataRepository {
 
             // 讀取備用測試檔
             if (!found) {
-                File testFile = new File(csvFilePath, "2025051602.csv"); // 根據你的 log 調整
+                File testFile = new File(csvFilePath, "20260113100.csv"); // 根據你的 log 調整
                 if (testFile.exists()) {
                     targetFile = testFile;
                     System.out.println("⚠️ [Repository] 使用測試備用檔: " + testFile.getName());
@@ -80,21 +80,15 @@ public class GetChillersDataRepository {
         Map<String, Double> signalSum = new HashMap<>();
         Map<String, Integer> counts = new HashMap<>();
 
-        // 1. 定義 CSV 裡真正有的欄位 (包含 T_CHW_out)
-        String[] tempFields = {
-                "Chiller_1_T_SP", "Chiller_2_T_SP",
-                "Chiller_1_Evap_Out_Temp", "Chiller_2_Evap_Out_Temp", // 可能不存在
-                "Chiller_1_T_CHW_out", "Chiller_2_T_CHW_out"          // 這是你 CSV 裡真正的出水溫
-        };
+        // ★ 核心欄位：只抓 SP (設定溫) 與 Signal (訊號)
+        String[] tempFields = {"Chiller_1_T_SP", "Chiller_2_T_SP"};
         String[] signalFields = {"Chiller_1_Signal", "Chiller_2_Signal"};
 
-        // 2. 累加數值
         for (Map<String, String> row : rawDataList) {
             for (String field : tempFields) accumulate(tempSum, counts, row, field);
             for (String field : signalFields) accumulate(signalSum, counts, row, field);
         }
 
-        // 3. 計算平均
         int totalRows = rawDataList.size();
         Map<String, Double> tempMean = new HashMap<>();
         Map<String, Double> signalMean = new HashMap<>();
@@ -104,20 +98,10 @@ public class GetChillersDataRepository {
             signalSum.forEach((k, v) -> signalMean.put(k, v / totalRows));
         }
 
-        // ★★★ 關鍵修正：強制把 T_CHW_out 的值 複製給 Evap_Out_Temp ★★★
-        // 這樣 Service 就一定抓得到 Evap_Out_Temp
-        forceMapValue(tempMean, "Chiller_1_Evap_Out_Temp", "Chiller_1_T_CHW_out");
-        forceMapValue(tempMean, "Chiller_2_Evap_Out_Temp", "Chiller_2_T_CHW_out");
+        // 印出 Log 確保數值有抓到 (例如 9.2)
+        System.out.println("🧮 [Repository] 抓取完成 - SP溫度: " + tempMean);
+        System.out.println("🧮 [Repository] 抓取完成 - 運轉訊號: " + signalMean);
 
-        // 如果上面失敗，再試試看用 T_SP 補 (保底)
-        if (!tempMean.containsKey("Chiller_1_Evap_Out_Temp")) {
-            forceMapValue(tempMean, "Chiller_1_Evap_Out_Temp", "Chiller_1_T_SP");
-        }
-        if (!tempMean.containsKey("Chiller_2_Evap_Out_Temp")) {
-            forceMapValue(tempMean, "Chiller_2_Evap_Out_Temp", "Chiller_2_T_SP");
-        }
-
-        System.out.println("🧮 [Check] 最終 Temp Map: " + tempMean);
         return new ChillerData(tempMean, signalMean);
     }
 
