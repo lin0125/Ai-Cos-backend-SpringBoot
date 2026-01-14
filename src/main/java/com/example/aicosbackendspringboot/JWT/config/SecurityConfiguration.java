@@ -33,6 +33,7 @@ public class SecurityConfiguration {
             "/api/getChillerParam",   // 冰機參數
             "/listModels",            // 模型列表
             "/api/grafana-embed",
+            "/api/getChillersData",
             "/api/chiller/**" // 剛剛新增的參數設定 API
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
