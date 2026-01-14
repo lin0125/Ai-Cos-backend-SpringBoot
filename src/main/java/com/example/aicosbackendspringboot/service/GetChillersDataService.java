@@ -17,45 +17,35 @@ public class GetChillersDataService {
         ChillerData rawData = repository.readHourlyChillerData();
         Map<String, Object> response = new HashMap<>();
 
-        if (rawData == null) {
-            return Map.of("Online_Chiller_ID", new ArrayList<>(), "Chiller_1_Temp", 0.0, "Chiller_2_Temp", 0.0);
+        // 如果沒資料，回傳基本結構避免前端報錯
+        if (rawData == null || rawData.getSignalMean() == null) {
+            response.put("Online_Chiller_ID", new ArrayList<>());
+            response.put("Chiller_1_Temp", 0.0);
+            response.put("Chiller_2_Temp", 0.0);
+            response.put("chillers_temperature", Arrays.asList(0.0, 0.0));
+            return response;
         }
 
         Map<String, Double> signals = rawData.getSignalMean();
         Map<String, Double> temps = rawData.getTempMean();
 
-        // --- 1. 先宣告所有需要的變數 ---
         List<String> onlineChillers = new ArrayList<>();
-        Double sp1 = 0.0;
-        Double sp2 = 0.0;
+        Double sp1 = temps.getOrDefault("Chiller_1_T_SP", 0.0);
+        Double sp2 = temps.getOrDefault("Chiller_2_T_SP", 0.0);
 
-        // --- 2. 獲取訊號值 (只定義一次) ---
+        // 判斷訊號 (這部分邏輯現在依賴 Repository 的參數順序修正)
         Double sig1 = signals.getOrDefault("Chiller_1_Signal", 0.0);
         Double sig2 = signals.getOrDefault("Chiller_2_Signal", 0.0);
 
-        System.out.println("📡 [Service] 檢查訊號 - Chiller1: " + sig1 + ", Chiller2: " + sig2);
+        if (sig1 > 0.5) onlineChillers.add("1");
+        if (sig2 > 0.5) onlineChillers.add("2");
 
-        // --- 3. 執行判斷邏輯 ---
-        if (sig1 != null && sig1 > 0.5) {
-            onlineChillers.add("1");
-            sp1 = temps.getOrDefault("Chiller_1_T_SP", 0.0);
-        }
-
-        if (sig2 != null && sig2 > 0.5) {
-            onlineChillers.add("2");
-            sp2 = temps.getOrDefault("Chiller_2_T_SP", 0.0);
-        }
-
-        // --- 4. 組裝回傳結果 ---
         response.put("Online_Chiller_ID", onlineChillers);
-        // 四捨五入到小數點第二位
+        // 無論是否有開機，都回傳 SP 值，讓前端決定怎麼顯示
         response.put("Chiller_1_Temp", Math.round(sp1 * 100.0) / 100.0);
         response.put("Chiller_2_Temp", Math.round(sp2 * 100.0) / 100.0);
-
-        // 為了相容前端可能需要的陣列格式
         response.put("chillers_temperature", Arrays.asList(sp1, sp2));
 
-        System.out.println("📦 [Service] 最終回傳 JSON: " + response);
         return response;
     }
 }

@@ -37,7 +37,7 @@ public class GetChillersDataRepository {
                 File pastFile = new File(csvFilePath, pastName);
                 if (pastFile.exists()) {
                     targetFile = pastFile;
-                    System.out.println("✅ [Repository] 找到歷史檔案: " + pastName);
+//                    System.out.println("✅ [Repository] 找到歷史檔案: " + pastName);
                     found = true;
                     break;
                 }
@@ -48,20 +48,20 @@ public class GetChillersDataRepository {
                 File testFile = new File(csvFilePath, "20260113100.csv"); // 根據你的 log 調整
                 if (testFile.exists()) {
                     targetFile = testFile;
-                    System.out.println("⚠️ [Repository] 使用測試備用檔: " + testFile.getName());
+//                    System.out.println("⚠️ [Repository] 使用測試備用檔: " + testFile.getName());
                 } else {
                     return new ChillerData(new HashMap<>(), new HashMap<>());
                 }
             }
         } else {
-            System.out.println("✅ [Repository] 找到當前檔案: " + targetFile.getName());
+//            System.out.println("✅ [Repository] 找到當前檔案: " + targetFile.getName());
         }
 
         // 2. 執行讀取
         try {
-            System.out.println("📂 [Repository] 最終讀取路徑: " + targetFile.getAbsolutePath());
+//            System.out.println("📂 [Repository] 最終讀取路徑: " + targetFile.getAbsolutePath());
             List<Map<String, String>> rawDataList = CsvReader.read(targetFile.getAbsolutePath());
-            System.out.println("📊 [Repository] 資料筆數: " + rawDataList.size());
+//            System.out.println("📊 [Repository] 資料筆數: " + rawDataList.size());
 
             if (rawDataList.isEmpty()) {
                 return new ChillerData(new HashMap<>(), new HashMap<>());
@@ -98,11 +98,11 @@ public class GetChillersDataRepository {
             signalSum.forEach((k, v) -> signalMean.put(k, v / totalRows));
         }
 
-        // 印出 Log 確保數值有抓到 (例如 9.2)
-        System.out.println("🧮 [Repository] 抓取完成 - SP溫度: " + tempMean);
-        System.out.println("🧮 [Repository] 抓取完成 - 運轉訊號: " + signalMean);
+//        // 印出 Log 確保數值有抓到 (例如 9.2)
+//        System.out.println("🧮 [Repository] 抓取完成 - SP溫度: " + tempMean);
+//        System.out.println("🧮 [Repository] 抓取完成 - 運轉訊號: " + signalMean);
 
-        return new ChillerData(tempMean, signalMean);
+        return new ChillerData(signalMean, tempMean);
     }
 
     // 強制賦值 helper
@@ -110,7 +110,7 @@ public class GetChillersDataRepository {
         if (map.containsKey(sourceKey)) {
             Double val = map.get(sourceKey);
             map.put(targetKey, val); // 直接覆蓋或新增
-            System.out.println("🔧 [Repository] 成功補值: " + targetKey + " = " + val);
+//            System.out.println("🔧 [Repository] 成功補值: " + targetKey + " = " + val);
         }
     }
 
