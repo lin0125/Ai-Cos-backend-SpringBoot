@@ -26,12 +26,12 @@ public class UserImpl implements UserService {
     private final JWTService jwtService;
 
     @Value("${admin.email}")
-    private final List<String> adminEmail;
+    private List<String> adminEmail; // 移除 final 修正 @Value 注入問題
 
     @Override
     public CommonResponse authGoogleToken(LoginRequest loginRequest) {
 
-        if (loginRequest == null || loginRequest.googleToken().isEmpty()) {
+        if (loginRequest == null || loginRequest.googleToken() == null || loginRequest.googleToken().isEmpty()) {
             return CommonResponse.builder()
                     .ok(false)
                     .error("ID Token is missing")
@@ -41,49 +41,46 @@ public class UserImpl implements UserService {
         Optional<GoogleIdToken.Payload> payloadOptional = googleAuthService.verifyToken(loginRequest.googleToken());
 
         if (payloadOptional.isPresent()) {
-            // 驗證成功
             GoogleIdToken.Payload payload = payloadOptional.get();
-
             String googleId = payload.getSubject();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
 
-            // ✅ 1. 宣告變數 (必須在 if/else 外面宣告，否則後面會找不到)
             UserEntity userToProcess;
-
             Optional<UserEntity> existingUser = userRepository.findByUserEmail(email);
 
-            if (existingUser.isEmpty()) {
-                // 使用者不存在，建立新使用者
-                UserEntity newUser = new UserEntity();
-                newUser.setUserEmail(email);
-                newUser.setUserName(name);
-                newUser.setUserGoogleId(googleId);
-
-                if (adminEmail.contains(email)) {
-                    newUser.setRole(Role.admin);
-                } else {
-                    newUser.setRole(Role.user);
-                }
-
-                // ✅ 2. 賦值 (這裡不要再寫 UserEntity userToProcess = ...，不然會變成區域變數)
-                userToProcess = userRepository.save(newUser);
-            } else {
-                // ✅ 3. 賦值
+            if (existingUser.isPresent()) {
+                // 情境 A：使用者已存在資料庫 (由 Admin 添加或是已登錄過)
                 userToProcess = existingUser.get();
+            } else {
+                // 情境 B：使用者不存在資料庫
+                userToProcess = new UserEntity();
+                userToProcess.setUserEmail(email);
+                userToProcess.setUserName(name);
+                userToProcess.setUserGoogleId(googleId);
+
+                // 判斷是否為預設管理員
+                if (adminEmail != null && adminEmail.contains(email)) {
+                    userToProcess.setRole(Role.admin);
+                    // 管理員第一次登入，自動存入資料庫以利後續查詢
+                    userToProcess = userRepository.save(userToProcess);
+                } else {
+                    // 💡 關鍵修改：若不是管理員且不在資料庫名單中，分配為 other
+                    // 這裡選擇不存入資料庫 (Transient)，或是存入但標記為 other
+                    userToProcess.setRole(Role.other);
+                    // 注意：如果您的 JWTService.generateToken 需要 ID，
+                    // 這裡可能需要暫時產生一個 UserEntity 物件而不存檔
+                }
             }
 
-            // ✅ 4. 使用 (因為在第 1 步有宣告在外面，所以這裡才讀得到)
+            // 產生包含 role (admin/user/other) 的 Token
             String userToken = jwtService.generateToken(userToProcess);
 
             LinkedHashMap<String, Object> data = new LinkedHashMap<>();
             data.put("message", "Authentication Successful");
             data.put("userName", name);
             data.put("userEmail", email);
-
-            // ✅ 5. 確保 Key 名稱是 "token" (配合前端)
             data.put("token", userToken);
-
             data.put("userRole", userToProcess.getRole());
 
             return CommonResponse.builder()
@@ -91,7 +88,6 @@ public class UserImpl implements UserService {
                     .data(data)
                     .build();
         } else {
-            // 驗證失敗
             return CommonResponse.builder()
                     .ok(false)
                     .error("Authentication failed: Invalid ID Token.")

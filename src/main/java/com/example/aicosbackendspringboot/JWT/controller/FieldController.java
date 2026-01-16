@@ -5,6 +5,7 @@ import com.example.aicosbackendspringboot.JWT.dtos.response.CommonResponse;
 import com.example.aicosbackendspringboot.JWT.service.FieldService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class FieldController {
     private FieldService fieldService;
 
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/add/field")
     public ResponseEntity<CommonResponse> addField(@RequestBody AddFieldRequest addFieldRequest) {
         try {

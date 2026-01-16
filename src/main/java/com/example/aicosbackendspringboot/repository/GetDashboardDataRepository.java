@@ -54,7 +54,7 @@ public class GetDashboardDataRepository {
                 }
             }
         } else {
-            System.out.println("⚠️ output_state.txt 不存在，使用預設路徑: " + outputPath);
+//            System.out.println("⚠️ output_state.txt 不存在，使用預設路徑: " + outputPath);
         }
 
         // 定義欄位名稱
@@ -86,13 +86,13 @@ public class GetDashboardDataRepository {
 
         // 2. 檢查該檔案是否存在
         if (!Files.exists(pathCheck)) {
-            System.out.println("⚠️ 找不到當前時間的檔案: " + hourlyPath);
+//            System.out.println("⚠️ 找不到當前時間的檔案: " + hourlyPath);
 
             // 3. 如果不存在，強制切換成「備援測試檔」 (請確保此檔案存在於 datasets 資料夾中)
             String defaultFile = "20260114.csv";
             hourlyPath = baseDir + defaultFile;
 
-            System.out.println("🔄 自動切換讀取備援檔案: " + hourlyPath);
+//            System.out.println("🔄 自動切換讀取備援檔案: " + hourlyPath);
 
             // 4. 如果連備援檔都找不到，這時候再報錯
             if (!Files.exists(Paths.get(hourlyPath))) {

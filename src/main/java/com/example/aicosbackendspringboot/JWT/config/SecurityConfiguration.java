@@ -33,17 +33,27 @@ public class SecurityConfiguration {
             "/api/getChillerParam",   // 冰機參數
             "/listModels",            // 模型列表
             "/api/grafana-embed",
-            "/api/getChillersData",
-            "/api/chiller/**" // 剛剛新增的參數設定 API
+            "/api/getChillersData"
+
     };
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // 這裡會找下面的 Bean
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req -> req.requestMatchers(WHITE_LIST_URL).permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(WHITE_LIST_URL).permitAll()
+                        // 1. 人員權限頁面/添加人員：僅限 admin
+                        .requestMatchers("/api/v1/add/field").hasAuthority("admin")
+                        // 2. 智慧控制頁面 API：僅限 admin 與 user (排除 other)
+                        .requestMatchers("/api/chiller/**").hasAnyAuthority("admin", "user")
+                        .requestMatchers("/api/getChillerParam").hasAnyAuthority("admin", "user")
+                        .requestMatchers("/listModels").hasAnyAuthority("admin", "user")
+                        // 3. 其他所有請求需通過身份驗證
+                        .anyRequest().authenticated()
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
